@@ -1,0 +1,29 @@
+# Kernel candidates compared via LOLO-CV (see Methodology: Physically
+# Consistent Surrogate Modeling). The winning kernel (by mean LOLO-CV
+# R^2, averaged across all held-out factors and sub-metrics) is used
+# for all subsequent GP fits.
+
+candidates:
+  - rbf
+  - matern32
+  - matern52
+
+# GaussianProcessRegressor settings shared across all kernel candidates
+gp:
+  n_restarts_optimizer: 3
+  random_state: 0
+  normalize_y: true
+
+# LOLO-CV settings
+lolo_cv:
+  factor_cols:
+    - "HTL thickness (μm)"
+    - "Absorber Thickness (μm)"
+    - "ETL thickness (μm)"
+    - "N_A (1/cm3)"
+    - "N_D (1/cm3)"
+  targets:
+    - "Voc (V)"
+    - "Jsc (mA/cm2)"
+    - "FF (%)"
+  n_jobs: 4  # local: 4 cores available (vs. 2 on Colab)

@@ -1,0 +1,23 @@
+name: solar-gpr
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy>=1.24
+  - pandas>=2.0
+  - scipy>=1.10
+  - scikit-learn>=1.3
+  - statsmodels>=0.14
+  - joblib>=1.3
+  - matplotlib>=3.7
+  - seaborn>=0.12
+  - pyyaml>=6.0
+  - openpyxl>=3.1
+  - jupyterlab
+  - pytest>=7.4
+  - pytest-cov
+  - ruff
+  - make
+  - pip
+  - pip:
+      - -e .

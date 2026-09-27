@@ -1,0 +1,27 @@
+# Settings for the targeted extrapolation search (Methodology:
+# Uncertainty Propagation and Targeted Extrapolation). This is NOT a
+# generic closed-loop BO campaign -- it ranks a small, physically
+# motivated candidate set by UCB score.
+
+monte_carlo:
+  n_samples: 10000
+  random_state: 0
+
+ucb:
+  beta: 2.0  # exploration weight; UCB = mean_pce + beta * std_pce
+
+# The extrapolation hypothesis: a polynomial fit to the tested grid
+# suggested a PCE turnover near N_A ~= 9.2e20 cm^-3, ~2x the tested
+# maximum (5e20 cm^-3). This searches a small grid around that value
+# while holding all other inputs at their best-observed combination.
+extrapolation_target:
+  varying_col: "N_A (1/cm3)"
+  search_min: 5.0e20   # tested max (lower bound of the search)
+  search_max: 1.5e21   # ~3x tested max (upper bound of the search)
+  n_points: 25
+  log_spaced: true
+
+  # Other four inputs are held fixed at the best PCE row observed in
+  # the tested grid; scripts/run_bo_extrapolation.py resolves this
+  # from data rather than hardcoding values here.
+  hold_other_inputs_at: "best_observed_pce"
