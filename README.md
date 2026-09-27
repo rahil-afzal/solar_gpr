@@ -120,5 +120,4 @@ before doing any expensive work.
 
 ## License
 
-MIT — see `LICENSE`. *(Confirm this is the intended license before
-publishing.)*
+MIT — see `LICENSE`.

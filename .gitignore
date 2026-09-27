@@ -1,5 +1,4 @@
-# Raw data: hosted separately (see data/README.md), not committed
-data/raw/*
+
 !data/raw/.gitkeep
 
 # Generated / cached
