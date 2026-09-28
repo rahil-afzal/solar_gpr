@@ -101,22 +101,11 @@ before doing any expensive work.
 
 ## Key methodological notes
 
-- **Full factorial, not random sampling.** The dataset is an
-  exhaustive 5×8×5×5×5 grid, not a Latin Hypercube or random sample —
-  this is why LOLO-CV (not a random train/test split) is used for
-  validation, and why the GP's role is interpolation/extrapolation
-  between/beyond tested grid points, not "avoiding expensive
-  simulations" (all 5000 grid points already exist).
-- **PCE is always derived, never modeled directly**, from independently
-  fit Voc/Jsc/FF GPs, to guarantee the efficiency identity holds even
-  when extrapolating. This does *not* bound the individual sub-metrics
-  (e.g. FF <= 100%) — see the methodology's "Physically Consistent
-  Surrogate Modeling" subsection for why that is a stated limitation,
-  not silently assumed away.
-- **The three sub-metric GPs are treated as independent** during Monte
-  Carlo uncertainty propagation, which is a known simplification (see
-  `solar_gpr.uncertainty` docstring) that tends to inflate the
-  propagated PCE uncertainty — a conservative bias, not a silent bug.
+- The dataset is a full factorial 5×8×5×5×5 grid with 5000 points. It is not a random sample or Latin Hypercube design. For this reason, validation uses LOLO-CV rather than a random train/test split. The GP is used to model the response across and beyond the tested grid, rather than to replace simulations that have not yet been performed.
+
+- PCE is calculated from separately fitted GPs for Voc, Jsc, and FF rather than being modeled as a separate target. This keeps the efficiency identity consistent during interpolation and extrapolation. It does not impose physical bounds on the individual quantities, such as FF ≤ 100%; this limitation is discussed in the "Physically Consistent Surrogate Modeling" section of the methodology.
+
+- For Monte Carlo uncertainty propagation, the three sub-metric GPs are treated as independent. This is a simplifying assumption documented in 'solar_gpr.uncertainty'. Ignoring correlations can make the propagated PCE uncertainty larger, so the resulting uncertainty estimate is generally conservative.
 
 ## License
 
