@@ -92,13 +92,32 @@ def main() -> None:
     out_path = args.out_dir / "targeted_extrapolation_candidates.csv"
     top.to_csv(out_path, index=False, encoding="utf-8")
 
+    # Full evaluated grid (not just the UCB top-5), sorted by the varying
+    # column so the shape of mean_pce/std_pce vs. the search variable can
+    # be read directly off the CSV -- this is what lets you tell a genuine
+    # interior optimum apart from the GP just drifting outward toward the
+    # edge of the search range under its prior.
+    full_grid = result.candidates.copy()
+    full_grid["mean_pce"] = result.mean_pce
+    full_grid["std_pce"] = result.std_pce
+    full_grid["ucb_score"] = result.ucb_score
+    full_grid = full_grid.sort_values(ex_cfg["varying_col"]).reset_index(drop=True)
+
+    full_grid_path = args.out_dir / "targeted_extrapolation_full_grid.csv"
+    full_grid.to_csv(full_grid_path, index=False, encoding="utf-8")
+
     print("Top 5 candidates by UCB score:")
     print(top)
     print(f"\nWrote {out_path}")
+    print(f"Wrote {full_grid_path}  ({len(full_grid)} candidates, sorted by {ex_cfg['varying_col']})")
     print(
         "\nNOTE: this is a hypothesis-generation step. The top candidate is a "
         "proposed NEXT SCAPS-1D simulation point, not a validated PCE prediction "
-        "(see Methodology: Uncertainty Propagation and Targeted Extrapolation)."
+        "(see Methodology: Uncertainty Propagation and Targeted Extrapolation). "
+        "Check targeted_extrapolation_full_grid.csv before committing to a "
+        "simulation run: if mean_pce/std_pce climb monotonically all the way "
+        "to the edge of the search range rather than peaking in the interior, "
+        "that is a sign of extrapolation drift, not a validated optimum."
     )
 
 
