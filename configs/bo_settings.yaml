@@ -16,8 +16,8 @@ ucb:
 # while holding all other inputs at their best-observed combination.
 extrapolation_target:
   varying_col: "N_A (1/cm3)"
-  search_min: 5.0e20   # tested max (lower bound of the search)
-  search_max: 1.5e21   # ~3x tested max (upper bound of the search)
+  search_min: 5.0e+20   # tested max (lower bound of the search)
+  search_max: 1.5e+21   # ~3x tested max (upper bound of the search)
   n_points: 25
   log_spaced: true
 
