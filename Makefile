@@ -8,7 +8,7 @@
 
 PYTHON ?= python
 NJOBS ?= 4
-KERNEL ?= matern52   # set after inspecting results/metrics/lolo_cv_kernel_summary.csv
+KERNEL ?= matern32   # set after inspecting results/metrics/lolo_cv_kernel_summary.csv
 
 .PHONY: help check anova lolo-cv surrogate-fit bo-extrapolation figures all clean
 
