@@ -13,10 +13,14 @@ simulated solar cell devices, this repository:
 4. Validates the surrogate honestly via Leave-One-Level-Out
    Cross-Validation (LOLO-CV), which is appropriate for a
    full-factorial design (random splits are misleadingly easy here).
+   It also evaluates the derived PCE from out-of-fold Voc, Jsc, and FF
+   predictions and reports residual correlations.
 5. Uses the validated surrogate to propose a small number of
    physically motivated extrapolation points (via Monte
    Carlo-propagated uncertainty and a UCB acquisition score) as
    candidates for the next SCAPS-1D simulation to run.
+6. Exports the fitted sub-metric GP hyperparameters, including optimizer
+   bound-hit diagnostics, for reporting.
 
 See `[paper draft link — TBD]` for the full methodology writeup this
 code implements.
@@ -27,9 +31,11 @@ code implements.
 data/           raw dataset (+ provenance notes) and cached processed artifacts
 notebooks/      01_eda.ipynb — exploratory data analysis only
 src/solar_gpr/  the actual package: data, features, anova, validation,
-                surrogate, uncertainty, optimization, plotting
+                surrogate, PCE validation, uncertainty, optimization,
+                plotting
 configs/        YAML settings for kernel comparison and BO/UCB search
-scripts/        CLI entry points that run the pipeline stages
+scripts/        CLI entry points for the pipeline, PCE validation, and
+                hyperparameter export
 results/        figures / tables / metrics written by scripts/
 tests/          pytest suite (fast; see "Tests" below)
 ```
@@ -61,14 +67,18 @@ file should be committed directly or hosted separately).
 
 Each stage is a standalone script; see `make help` for the full list.
 **Cost note:** stages are ordered cheap -> expensive. `lolo-cv` and
-`surrogate-fit` are the expensive ones (each fits many Gaussian
-Processes with hyperparameter optimization); everything else is fast.
+`surrogate-fit` are expensive (many Gaussian Process fits with
+hyperparameter optimization). `lolo-cv-pce` is also expensive: it fits
+three GPs for each LOLO fold. Use a modest `NJOBS` if memory is limited.
+The hyperparameter export is cheap and runs after `surrogate-fit`.
 
 ```bash
 make check             # dataset integrity verification (cheap)
 make anova              # ANOVA / eta-squared table (cheap)
 make lolo-cv NJOBS=4    # kernel comparison via LOLO-CV (EXPENSIVE, parallel across cores)
 make surrogate-fit KERNEL=matern52   # fit final GPs with the winning kernel (EXPENSIVE)
+make lolo-cv-pce KERNEL=matern52 NJOBS=3  # validate derived PCE via LOLO-CV (EXPENSIVE)
+make hyperparameters    # export fitted GP parameters after surrogate-fit (cheap)
 make bo-extrapolation   # rank extrapolation candidates by UCB (moderate)
 make figures            # regenerate all figures from saved results (cheap)
 ```
@@ -76,7 +86,16 @@ make figures            # regenerate all figures from saved results (cheap)
 `make all` runs the full pipeline in order; prefer running stages
 individually the first time through so you can inspect
 `results/metrics/lolo_cv_kernel_summary.csv` before choosing `KERNEL`
-for `surrogate-fit`.
+for `surrogate-fit`. The separate `lolo-cv-pce` and `hyperparameters`
+targets are not included in `make all`; run PCE validation with the same
+kernel used for the final surrogate.
+
+The PCE LOLO-CV command writes out-of-fold predictions and fold metrics
+under `results/metrics/`, plus per-factor CSV and LaTeX tables and
+residual correlations under `results/tables/`. After fitting the final
+surrogate, `make hyperparameters` writes
+`final_gp_hyperparameters.csv` and `.tex` in `results/tables/` and
+reports any fitted parameters at optimizer bounds.
 
 Every script also runs standalone with `--help` for its full option
 list, e.g.:

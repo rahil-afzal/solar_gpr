@@ -6,17 +6,19 @@
 # running targets individually the first time so you can inspect
 # results (and cost) at each stage.
 
-PYTHON ?= python
-NJOBS ?= 4
+PYTHON ?= python3
+NJOBS ?= 3
 KERNEL ?= matern32   # set after inspecting results/metrics/lolo_cv_kernel_summary.csv
 
-.PHONY: help check anova lolo-cv surrogate-fit bo-extrapolation figures all clean
+.PHONY: help check anova lolo-cv lolo-cv-pce hyperparameters surrogate-fit bo-extrapolation figures all clean
 
 help:
 	@echo "Targets:"
 	@echo "  check           - cheap: dataset integrity verification"
 	@echo "  anova           - cheap: ANOVA / eta-squared table"
 	@echo "  lolo-cv         - EXPENSIVE: kernel comparison via LOLO-CV (NJOBS=$(NJOBS))"
+	@echo "  lolo-cv-pce     - EXPENSIVE: derived PCE LOLO-CV (KERNEL=$(KERNEL), NJOBS=$(NJOBS))"
+	@echo "  hyperparameters - cheap: export fitted GP parameters (run after surrogate-fit)"
 	@echo "  surrogate-fit   - EXPENSIVE: fit final GPs (KERNEL=$(KERNEL))"
 	@echo "  bo-extrapolation- moderate: UCB-ranked extrapolation candidates"
 	@echo "  figures         - cheap: regenerate figures from saved results"
@@ -31,6 +33,12 @@ anova:
 
 lolo-cv:
 	$(PYTHON) scripts/run_lolo_cv.py --n-jobs $(NJOBS)
+
+lolo-cv-pce:
+	$(PYTHON) scripts/run_lolo_cv_pce.py --kernel $(KERNEL) --n-jobs $(NJOBS)
+
+hyperparameters:
+	$(PYTHON) scripts/export_hyperparameters.py
 
 surrogate-fit:
 	$(PYTHON) scripts/run_surrogate_fit.py --kernel $(KERNEL)
